@@ -67,6 +67,7 @@
 		<preference name="ANDROID_FIREBASE_AUTH_VERSION" default="20.0.3" />
 		<preference name="ANDROID_FIREBASE_FIRESTORE_VERSION" default="22.1.1" />
 		<preference name="ANDROID_FIREBASE_FUNCTIONS_VERSION" default="19.2.0" />
+		<preference name="ANDROID_FIREBASE_INSTALLATIONS_VERSION" default="16.3.5" />
 		<preference name="ANDROID_FIREBASE_CRASHLYTICS_VERSION" default="17.4.0" />
 		<preference name="ANDROID_FIREBASE_CRASHLYTICS_NDK_VERSION" default="17.4.0" />
 		<preference name="ANDROID_GSON_VERSION" default="2.8.6" />
@@ -80,6 +81,7 @@
 		<framework src="com.google.firebase:firebase-auth:$ANDROID_FIREBASE_AUTH_VERSION" />
 		<framework src="com.google.firebase:firebase-firestore:$ANDROID_FIREBASE_FIRESTORE_VERSION" />
 		<framework src="com.google.firebase:firebase-functions:$ANDROID_FIREBASE_FUNCTIONS_VERSION" />
+		<framework src="com.google.firebase:firebase-installations:$ANDROID_FIREBASE_INSTALLATIONS_VERSION" />
 		<framework src="com.google.firebase:firebase-crashlytics:$ANDROID_FIREBASE_CRASHLYTICS_VERSION" />
 		<framework src="com.google.firebase:firebase-crashlytics-ndk:$ANDROID_FIREBASE_CRASHLYTICS_NDK_VERSION" />
 		<framework src="com.google.code.gson:gson:$ANDROID_GSON_VERSION" />
@@ -139,6 +141,8 @@
 				<pod name="Firebase/RemoteConfig" spec="7.8.1"/>
 				<pod name="FirebaseFirestore" git="https://github.com/invertase/firestore-ios-sdk-frameworks.git" tag="7.8.1"/>
 				<pod name="Firebase/Crashlytics" spec="7.8.1"/>
+				<pod name="Firebase/Functions" spec="7.8.1"/>
+				<pod name="Firebase/Installations" spec="7.8.1"/>
 				<pod name="GoogleSignIn" spec="5.0.2"/>
 			</pods>
 		</podspec>
