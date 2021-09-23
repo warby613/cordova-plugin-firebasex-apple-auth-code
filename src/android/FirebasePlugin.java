@@ -47,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.OAuthCredential;
 import com.google.firebase.auth.OAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
@@ -2960,7 +2961,17 @@ public class FirebasePlugin extends CordovaPlugin {
         public void onSuccess(AuthResult authResult) {
             Log.d(TAG, "AuthResult:onSuccess:" + authResult);
             if(FirebasePlugin.instance.authResultCallbackContext != null){
-                FirebasePlugin.instance.authResultCallbackContext.success();
+                JSONObject returnResults = new JSONObject();
+                try {
+                    AuthCredential authCredential = authResult.getCredential();
+                    if (authCredential instanceof OAuthCredential) {
+                        OAuthCredential oAuthCredential = (OAuthCredential)authCredential;
+                        returnResults.put("idToken", oAuthCredential.getIdToken());
+                    }
+                } catch (Exception e) {
+                    handleExceptionWithContext(e, FirebasePlugin.instance.authResultCallbackContext);
+                }
+                FirebasePlugin.instance.authResultCallbackContext.success(returnResults);
             }
         }
     }
