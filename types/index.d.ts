@@ -220,7 +220,7 @@ export interface FirebasePlugin {
         error?: (err: string) => void
     ): void
     sendUserEmailVerification(
-        actionCodeSettings?: {
+        actionCodeSettings: {
             handleCodeInApp: boolean,
             url: string,
             dynamicLinkDomain: string,

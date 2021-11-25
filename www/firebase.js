@@ -340,6 +340,7 @@ exports.updateUserEmail = function (email, success, error) {
 };
 
 exports.sendUserEmailVerification = function (actionCodeSettings, success, error) {
+    if(typeof actionCodeSettings !== 'object' || !actionCodeSettings) return error("'actionCodeSettings' must be an object");
     exec(success, error, "FirebasePlugin", "sendUserEmailVerification", [actionCodeSettings]);
 };
 
