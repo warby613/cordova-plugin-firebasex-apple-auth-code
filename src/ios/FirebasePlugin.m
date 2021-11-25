@@ -889,12 +889,33 @@ static NSMutableDictionary* traces;
 - (void)sendUserEmailVerification:(CDVInvokedUrlCommand*)command{
     @try {
         FIRUser* user = [FIRAuth auth].currentUser;
+        NSDictionary* actionCodeSettingsParams = [command.arguments objectAtIndex:0];
+
+        FIRActionCodeSettings *actionCodeSettings = [[FIRActionCodeSettings alloc] init];
+
+        if([actionCodeSettingsParams objectForKey:@"handleCodeInApp"] != nil){
+            actionCodeSettings.handleCodeInApp = [actionCodeSettingsParams objectForKey:@"handleCodeInApp"];
+        }
+        if([actionCodeSettingsParams objectForKey:@"url"] != nil){
+            actionCodeSettings.URL = [actionCodeSettingsParams objectForKey:@"url"];
+        }
+        if([actionCodeSettingsParams objectForKey:@"dynamicLinkDomain"] != nil){
+            actionCodeSettings.dynamicLinkDomain = [actionCodeSettingsParams objectForKey:@"dynamicLinkDomain"];
+        }
+        if([actionCodeSettingsParams objectForKey:@"iosBundleId"] != nil){
+            actionCodeSettings.iOSBundleID = [actionCodeSettingsParams objectForKey:@"iosBundleId"];
+        }
+        if([actionCodeSettingsParams objectForKey:@"androidPackageName"] != nil){
+            [actionCodeSettings setAndroidPackageName:[actionCodeSettingsParams objectForKey:@"androidPackageName"]
+                                installIfNotAvailable:[actionCodeSettingsParams objectForKey:@"installIfNotAvailable"]
+                                       minimumVersion:[actionCodeSettingsParams objectForKey:@"minimumVersion"]];
+        }
         if(!user){
             [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No user is currently signed"] callbackId:command.callbackId];
             return;
         }
 
-        [user sendEmailVerificationWithCompletion:^(NSError *_Nullable error) {
+        [user sendEmailVerificationWithActionCodeSettings:actionCodeSettings completion:^(NSError * _Nullable error) {
           @try {
               [self handleEmptyResultWithPotentialError:error command:command];
           }@catch (NSException *exception) {

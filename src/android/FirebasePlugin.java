@@ -22,6 +22,7 @@ import androidx.core.app.NotificationManagerCompat;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -1280,12 +1281,22 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    JSONObject actionCodeSettingsParams = args.getJSONObject(0);
+                    ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                        .setUrl(actionCodeSettingsParams.getString("url"))
+                        .setDynamicLinkDomain(actionCodeSettingsParams.getString("dynamicLinkDomain"))
+                        .setHandleCodeInApp(actionCodeSettingsParams.getBoolean("handleCodeInApp"))
+                        .setIOSBundleId(actionCodeSettingsParams.getString("iosBundleId"))
+                        .setAndroidPackageName(actionCodeSettingsParams.getString("androidPackageName"),
+                            actionCodeSettingsParams.getBoolean("installIfNotAvailable"),
+                            actionCodeSettingsParams.getString("minimumVersion"))
+                        .build();
                     if(user == null){
                         callbackContext.error("No user is currently signed");
                         return;
                     }
 
-                    handleTaskOutcome(user.sendEmailVerification(), callbackContext);
+                    handleTaskOutcome(user.sendEmailVerification(actionCodeSettings), callbackContext);
                 } catch (Exception e) {
                     handleExceptionWithContext(e, callbackContext);
                 }
