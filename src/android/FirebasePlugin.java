@@ -1281,8 +1281,11 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    JSONObject actionCodeSettingsParams = args.getJSONObject(0);
-                    ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                    ActionCodeSettings actionCodeSettings = null;
+
+                    if(!args.isNull(0)) {
+                      JSONObject actionCodeSettingsParams = args.getJSONObject(0);
+                      actionCodeSettings = ActionCodeSettings.newBuilder()
                         .setUrl(actionCodeSettingsParams.getString("url"))
                         .setDynamicLinkDomain(actionCodeSettingsParams.getString("dynamicLinkDomain"))
                         .setHandleCodeInApp(actionCodeSettingsParams.getBoolean("handleCodeInApp"))
@@ -1296,8 +1299,12 @@ public class FirebasePlugin extends CordovaPlugin {
                         return;
                     }
 
-                    handleTaskOutcome(user.sendEmailVerification(actionCodeSettings), callbackContext);
-                } catch (Exception e) {
+                    if(actionCodeSettings != null) {
+                        handleTaskOutcome(user.sendEmailVerification(actionCodeSettings), callbackContext);
+                    } else {
+                        handleTaskOutcome(user.sendEmailVerification(), callbackContext);
+                    }
+                    } catch (Exception e) {
                     handleExceptionWithContext(e, callbackContext);
                 }
             }
