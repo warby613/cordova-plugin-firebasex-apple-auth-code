@@ -221,13 +221,13 @@ export interface FirebasePlugin {
     ): void
     sendUserEmailVerification(
         actionCodeSettings?: {
-            handleCodeInApp: boolean,
+            handleCodeInApp?: boolean,
             url: string,
-            dynamicLinkDomain: string,
+            dynamicLinkDomain?: string,
             iosBundleId: string,
             androidPackageName: string,
-            installIfNotAvailable: boolean,
-            minimumVersion: string,
+            installIfNotAvailable?: boolean,
+            minimumVersion?: string,
         },
         success?: () => void,
         error?: (err: string) => void
