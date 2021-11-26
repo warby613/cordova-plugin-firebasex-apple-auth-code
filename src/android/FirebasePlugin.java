@@ -1281,29 +1281,28 @@ public class FirebasePlugin extends CordovaPlugin {
             public void run() {
                 try {
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    ActionCodeSettings actionCodeSettings = null;
 
-                    if(!args.isNull(0)) {
-                      JSONObject actionCodeSettingsParams = args.getJSONObject(0);
-                      actionCodeSettings = ActionCodeSettings.newBuilder()
-                        .setUrl(actionCodeSettingsParams.getString("url"))
-                        .setDynamicLinkDomain(actionCodeSettingsParams.getString("dynamicLinkDomain"))
-                        .setHandleCodeInApp(actionCodeSettingsParams.getBoolean("handleCodeInApp"))
-                        .setIOSBundleId(actionCodeSettingsParams.getString("iosBundleId"))
-                        .setAndroidPackageName(actionCodeSettingsParams.getString("androidPackageName"),
-                            actionCodeSettingsParams.getBoolean("installIfNotAvailable"),
-                            actionCodeSettingsParams.getString("minimumVersion"))
-                        .build();
                     if(user == null){
                         callbackContext.error("No user is currently signed");
                         return;
                     }
 
-                    if(actionCodeSettings != null) {
+                    if(!args.isNull(0)) {
+                        JSONObject actionCodeSettingsParams = args.getJSONObject(0);
+                        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                                .setUrl(actionCodeSettingsParams.getString("url"))
+                                .setDynamicLinkDomain(actionCodeSettingsParams.optString("dynamicLinkDomain"))
+                                .setHandleCodeInApp(actionCodeSettingsParams.optBoolean("handleCodeInApp"))
+                                .setIOSBundleId(actionCodeSettingsParams.optString("iosBundleId"))
+                                .setAndroidPackageName(actionCodeSettingsParams.optString("androidPackageName"),
+                                        actionCodeSettingsParams.optBoolean("installIfNotAvailable"),
+                                        actionCodeSettingsParams.optString("minimumVersion"))
+                                .build();
                         handleTaskOutcome(user.sendEmailVerification(actionCodeSettings), callbackContext);
                     } else {
                         handleTaskOutcome(user.sendEmailVerification(), callbackContext);
                     }
+
                     } catch (Exception e) {
                     handleExceptionWithContext(e, callbackContext);
                 }

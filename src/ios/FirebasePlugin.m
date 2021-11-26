@@ -890,10 +890,14 @@ static NSMutableDictionary* traces;
     @try {
         FIRUser* user = [FIRAuth auth].currentUser;
         NSDictionary* actionCodeSettingsParams = [command.arguments objectAtIndex:0];
-        FIRActionCodeSettings *actionCodeSettings = nil;
+
+        if(!user){
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No user is currently signed"] callbackId:command.callbackId];
+            return;
+        }
 
         if(![actionCodeSettingsParams isEqual:[NSNull null]]) {
-            actionCodeSettings = [[FIRActionCodeSettings alloc] init];
+            FIRActionCodeSettings *actionCodeSettings = [[FIRActionCodeSettings alloc] init];
             if([actionCodeSettingsParams objectForKey:@"handleCodeInApp"] != nil){
                 actionCodeSettings.handleCodeInApp = [[actionCodeSettingsParams objectForKey:@"handleCodeInApp"] boolValue];
             }
@@ -907,17 +911,14 @@ static NSMutableDictionary* traces;
                 actionCodeSettings.iOSBundleID = [NSString stringWithString: [actionCodeSettingsParams objectForKey:@"iosBundleId"]];
             }
             if([actionCodeSettingsParams objectForKey:@"androidPackageName"] != nil){
+                NSString* minimumVersion;
+                if ([actionCodeSettingsParams objectForKey:@"minimumVersion"] != nil) {
+                   minimumVersion = [NSString stringWithString:[actionCodeSettingsParams objectForKey:@"minimumVersion"]];
+                }
                 [actionCodeSettings setAndroidPackageName:[NSString stringWithString:[actionCodeSettingsParams objectForKey:@"androidPackageName"]]
                                     installIfNotAvailable:[[actionCodeSettingsParams objectForKey:@"installIfNotAvailable"] boolValue]
-                                           minimumVersion:[NSString stringWithString:[actionCodeSettingsParams objectForKey:@"minimumVersion"]]];
+                                           minimumVersion:minimumVersion];
             }
-        }
-        if(!user){
-            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No user is currently signed"] callbackId:command.callbackId];
-            return;
-        }
-
-        if(actionCodeSettings){
             [user sendEmailVerificationWithActionCodeSettings:actionCodeSettings completion:^(NSError * _Nullable error) {
                 @try {
                     [self handleEmptyResultWithPotentialError:error command:command];
