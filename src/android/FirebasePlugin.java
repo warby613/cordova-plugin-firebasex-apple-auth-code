@@ -1303,7 +1303,7 @@ public class FirebasePlugin extends CordovaPlugin {
                         handleTaskOutcome(user.sendEmailVerification(), callbackContext);
                     }
 
-                    } catch (Exception e) {
+                } catch (Exception e) {
                     handleExceptionWithContext(e, callbackContext);
                 }
             }
