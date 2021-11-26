@@ -14,7 +14,7 @@ It removes the Firebase Inapp Messaging and Google Tag Manager SDK components du
 To use it, install an npm release with the `-cli` suffix, e.g.:
 
     cordova plugin add cordova-plugin-firebasex@9.0.1-cli
-
+    
 Or install it directly from this branch:
 
     cordova plugin add https://github.com/dpa99c/cordova-plugin-firebasex#cli_build
