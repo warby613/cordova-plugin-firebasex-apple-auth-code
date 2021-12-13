@@ -1202,7 +1202,7 @@ public class FirebasePlugin extends CordovaPlugin {
                 try {
                     String idToken = result.getToken();
                     returnResults.put("idToken", idToken);
-        			returnResults.put("providerId", result.getSignInProvider());
+                    returnResults.put("providerId", result.getSignInProvider());
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, returnResults));
                 } catch (Exception e) {
                     handleExceptionWithContext(e, callbackContext);
