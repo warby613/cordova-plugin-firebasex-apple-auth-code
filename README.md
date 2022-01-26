@@ -81,6 +81,7 @@ To help ensure this plugin is kept updated, new features are added and bugfixes 
   - [iOS notifications](#ios-notifications)
     - [iOS background notifications](#ios-background-notifications)
     - [iOS notification sound](#ios-notification-sound)
+    - [iOS critical notifications](#ios-critical-notifications)
     - [iOS badge number](#ios-badge-number)
     - [iOS actionable notifications](#ios-actionable-notifications)
   - [Data messages](#data-messages)
@@ -106,6 +107,7 @@ To help ensure this plugin is kept updated, new features are added and bugfixes 
     - [onApnsTokenReceived](#onapnstokenreceived)
     - [onMessageReceived](#onmessagereceived)
     - [grantPermission](#grantpermission)
+    - [grantCriticalPermission](#grantcriticalpermission)
     - [hasPermission](#haspermission)
     - [unregister](#unregister)
     - [isAutoInitEnabled](#isautoinitenabled)
@@ -249,6 +251,7 @@ See [Specifying Android library versions](#specifying-android-library-versions) 
     - e.g.  `--variable ANDROID_FIREBASE_PERFORMANCE_MONITORING=true`
     - Defaults to `false` if not specified.
 - `ANDROID_FIREBASE_PERF_GRADLE_PLUGIN_VERSION` - overrides the default version of the [Firebase Performance Monitoring Gradle plugin for Android](https://firebase.google.com/docs/perf-mon/get-started-android?authuser=0#add-perfmon-plugin)
+- `ANDROID_GRPC_OKHTTP` - sets version of GRPC OKHTTP library.
 
 ### iOS only
 - `IOS_STRIP_DEBUG` - prevents symbolification of all libraries included via Cocoapods. See [Strip debug symbols](#strip-debug-symbols) for more info.
@@ -267,6 +270,10 @@ See [Specifying Android library versions](#specifying-android-library-versions) 
 - `IOS_ENABLE_APPLE_SIGNIN` - enables the Sign In with Apple capability in Xcode.
     - `--variable IOS_ENABLE_APPLE_SIGNIN=true`
     - Ensure the associated app provisioning profile also has this capability enabled.
+- `IOS_ENABLE_CRITICAL_ALERTS_ENABLED` - enables the critical alerts capability
+  - `--variable IOS_ENABLE_CRITICAL_ALERTS_ENABLED=true`
+  - See [iOS critical notifications](#ios-critical-notifications)
+  - Ensure the associated app provisioning profile also has this capability enabled.
 
 ## Supported Cordova Versions
 - cordova: `>= 9`
@@ -479,7 +486,7 @@ Therefore if you need to change the specified versions, you'll currently need to
 ### Cocoapods
 This plugin relies on `cordova@9`/`cordova-ios@5` support for the [CocoaPods dependency manager]( https://cocoapods.org/) in order to satisfy the iOS Firebase SDK library dependencies.
 
-Please make sure you have `cocoapods@>=1.10` installed in your iOS build environment - setup instructions can be found [here](https://cocoapods.org/).
+Please make sure you have `cocoapods@>=1.11.2` installed in your iOS build environment - setup instructions can be found [here](https://cocoapods.org/).
 
 If building your project in Xcode, you need to open `YourProject.xcworkspace` (not `YourProject.xcodeproj`) so both your Cordova app project and the Pods project will be loaded into Xcode.
 
@@ -1163,6 +1170,11 @@ In a data message, specify the `notification_ios_sound` key in the `data` sectio
 }
 ```
 
+### iOS critical notifications
+iOS offers the option to send critical push notifications. These kind of notifications appear even when your iPhone or iPad is in Do Not Disturb mode or silenced. Sending critical notifications requires a special entitlement that needs to be issued by Apple.
+Use the pugin setting `IOS_ENABLE_CRITICAL_ALERTS_ENABLED=true` to enable the critical push notifications capability.
+A user also needs to explicitly [grant permission](#grantcriticalpermission) to receive critical alerts.
+
 ### iOS badge number
 In a notification message, specify the `badge` key in the `apns.payload.aps` section, for example:
 
@@ -1330,11 +1342,24 @@ On Android:
 
 The following Android-specific keys are supported and should be placed inside the `data` section:
 
+- `notification_android_id` - Identifier used to replace existing notifications in the notification drawer
+    - If not specified, each request creates a new notification.
+    - If specified and a notification with the same tag is already being shown, the new notification replaces the existing one in the notification drawer.
+- `notification_android_body_html` - If is passed, the body of a notification is processed as if it were html, you can use <b>, <i> or <s>  
+    - If not specified, the body of the notification will be processed as plain text.
 - `notification_android_icon` - name of a [custom notification icon](#android-custom-notification-icons) in the drawable resources
     - if not specified, the plugin will use the default `notification_icon` if it exists; otherwise the default app icon will be displayed
     - if a [large icon](#android-large-notification-icon) has been defined, it will also be displayed in the system notification.
 - `notification_android_color` - the [color accent](#android-notification-color) to use for the small notification icon
     - if not specified, the default color accent will be used
+- `notification_android_image` - Specifies the image notification
+    - if not specified, the notification will not show any image
+- `notification_android_image_type` - Specifies the image notification type
+    - Possible values:
+        - `square` - The image is displayed in the default format.
+        - `circle` - This notification displays the image in circular format.
+        - `big_picture` - Displays the image like `square` type, but the notification can be expanded and show the image in a big picture, example: https://developer.android.com/training/notify-user/expanded#image-style
+    - Defaults to `square` if not specified.
 - `notification_android_channel_id` - ID of the [notification channel](#android-notification-channels) to use to display the notification
     - Only applies to Android 8.0 and above
     - If not specified, the [default notification channel](#default-android-channel-properties) will be used.
@@ -1388,6 +1413,8 @@ Example data message with Android notification keys:
     "notification_android_visibility": "1",
     "notification_android_color": "#ff0000",
     "notification_android_icon": "coffee",
+    "notification_android_image": "https://example.com/avatar.jpg",
+    "notification_android_image_type": "circle",
     "notification_android_sound": "my_sound",
     "notification_android_vibrate": "500, 200, 500",
     "notification_android_lights": "#ffff0000, 250, 250"
@@ -1627,10 +1654,21 @@ iOS only (Android will always return true).
 - {function} error - callback function which will be passed a {string} error message as an argument
 - {boolean} requestWithProvidesAppNotificationSettings - boolean which indicates if app provides AppNotificationSettingsButton (**iOS12+ only**)
 
+### grantCriticalPermission
+Grant critical permission to receive critical push notifications (will trigger additional prompt) and return `hasPermission: true`.
+iOS 12.0+ only (Android will always return true).
+
+**Parameters**:
+- {function} success - callback function which will be passed the {boolean} permission result as an argument
+- {function} error - callback function which will be passed a {string} error message as an argument
+
+**Critical push notifications require a special entitlement that needs to be issued by Apple.**
+
 ```javascript
 FirebasePlugin.grantPermission(function(hasPermission){
     console.log("Permission was " + (hasPermission ? "granted" : "denied"));
 });
+
 ```
 ### hasPermission
 Check permission to receive push notifications and return the result to a callback function as boolean.
@@ -1644,6 +1682,22 @@ On Android, returns true if remote notifications are enabled.
 ```javascript
 FirebasePlugin.hasPermission(function(hasPermission){
     console.log("Permission is " + (hasPermission ? "granted" : "denied"));
+});
+```
+
+### hasCriticalPermission
+Check permission to receive critical push notifications and return the result to a callback function as boolean.
+iOS 12.0+ only (Android will always return true).
+
+**Critical push notifications require a special entitlement that needs to be issued by Apple.**
+
+**Parameters**:
+- {function} success - callback function which will be passed the {boolean} permission result as an argument
+- {function} error - callback function which will be passed a {string} error message as an argument
+
+```javascript
+FirebasePlugin.hasCriticalPermission(function(hasPermission){
+    console.log("Permission to send critical push notificaitons is " + (hasPermission ? "granted" : "denied"));
 });
 ```
 
@@ -1840,7 +1894,15 @@ var channel  = {
     //-1 - secret - Do not reveal any part of the notification on a secure lockscreen.
     //0 - private - Show the notification on all lockscreens, but conceal sensitive or private information on secure lockscreens.
     //1 - public - Show the notification in its entirety on all lockscreens.
-    visibility: 1
+    visibility: 1,
+
+    // Optionally specify the usage type of the notification. Defaults to USAGE_NOTIFICATION_RINGTONE ( =6)
+    // For a list of all possible usages, see https://developer.android.com/reference/android/media/AudioAttributes.Builder#setUsage(int)
+
+    usage: 6,
+    // Optionally specify the stream type of the notification channel.
+    // For a list of all possible values, see https://developer.android.com/reference/android/media/AudioAttributes.Builder#setLegacyStreamType(int)
+    streamType: 5,
 };
 
 // Create the channel
@@ -2080,8 +2142,8 @@ FirebasePlugin.setUserId("user_id");
 Set a user property for use in Analytics:
 
 **Parameters**:
-- {string} userName - name of user property to set in Firebase Analytics
-- {string} userName - value of user property to set in Firebase Analytics
+- {string} name - name of user property to set in Firebase Analytics
+- {string} value - value of user property to set in Firebase Analytics
 
 ```javascript
 FirebasePlugin.setUserProperty("name", "value");
@@ -2214,6 +2276,7 @@ In a Cordova app, you may use this to log unhandled Javascript exceptions, for e
 
 The event will appear under `Event type = "Non-fatals"` in the Crashlytics console.
 The error message will appear in the `Logs` section of the non-fatal error event.
+Note that logged errors will only be sent to the Crashlytics server on the next full app restart.
 Also logs the error message to the native device console.
 
 **Parameters**:
@@ -2846,6 +2909,26 @@ Example usage:
     FirebasePlugin.registerAuthStateChangeListener(function(userSignedIn){
         console.log("Auth state changed: User signed " + (userSignedIn ? "in" : "out"));
     });
+```
+
+### useAuthEmulator
+Instruments your app to talk to the [Firebase Authentication emulator](https://firebase.google.com/docs/emulator-suite/connect_auth).
+
+
+**Parameters**:
+- {string} host - hostname or IP address of the Authentication emulator.
+- {integer} port - port of the Authentication emulator.
+- {function} success - callback function to call on success
+- {function} error - callback function which will be passed a {string} error message as an argument
+
+Example usage:
+
+```javascript
+FirebasePlugin.useAuthEmulator('localhost', 9099, function() {
+    console.log("Using Firebase Authentication emulator");
+}, function(error) {
+    console.error("Failed to enable the Firebase Authentication emulator", error);
+});
 ```
 
 ## Remote Config
