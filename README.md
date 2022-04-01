@@ -14,7 +14,7 @@ It removes the Firebase Inapp Messaging and Google Tag Manager SDK components du
 To use it, install an npm release with the `-cli` suffix, e.g.:
 
     cordova plugin add cordova-plugin-firebasex@9.0.1-cli
-    
+
 Or install it directly from this branch:
 
     cordova plugin add https://github.com/dpa99c/cordova-plugin-firebasex#cli_build
@@ -167,6 +167,8 @@ To help ensure this plugin is kept updated, new features are added and bugfixes 
     - [linkUserWithCredential](#linkuserwithcredential)
     - [reauthenticateWithCredential](#reauthenticatewithcredential)
     - [registerAuthStateChangeListener](#registerauthstatechangelistener)
+    - [useAuthEmulator](#useAuthEmulator)
+    - [getClaims](#getClaims)
   - [Remote Config](#remote-config)
     - [fetch](#fetch)
     - [activateFetched](#activatefetched)
@@ -2926,6 +2928,32 @@ Example usage:
 ```javascript
 FirebasePlugin.useAuthEmulator('localhost', 9099, function() {
     console.log("Using Firebase Authentication emulator");
+}, function(error) {
+    console.error("Failed to enable the Firebase Authentication emulator", error);
+});
+```
+
+### getClaims
+Returns the entire payload claims of the ID token including the standard reserved claims as well as the custom claims (set by developer via Admin SDK).
+
+
+**Parameters**:
+- {function} success - callback function to pass claims {object} to as an argument
+- {function} error - callback function which will be passed a {string} error message as an argument
+
+Example usage:
+
+```javascript
+FirebasePlugin.getClaims(function(claims) {
+    // reserved claims
+    console.log("email", claims.email);
+    console.log("email_verified", claims.email_verified);
+    console.log("name", claims.name);
+    console.log("user_id", claims.user_id);
+
+    //custom claims
+    console.log("exampleClaimA", claims.exampleClaimA);
+    console.log("exampleClaimB", claims.exampleClaimB);
 }, function(error) {
     console.error("Failed to enable the Firebase Authentication emulator", error);
 });
